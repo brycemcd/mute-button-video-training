@@ -1,0 +1,6 @@
+imageio
+numpy
+scipy
+pandas
+sklearn
+jupyter

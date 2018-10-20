@@ -1,0 +1,37 @@
+version: '2'
+services:
+  # Looks for images in the VIDEO_BASE_DIR and transforms them to greyscale,
+  # 240x320, then creates FPS images from the video and writes those images
+  # to DESTINATION_DIR
+  #
+  # NOTES:
+  # capture directly from webcam:
+  # sudo apt-get install v4l-utils 
+  # Stream from webcam:
+  # ffmpeg -f v4l2 -framerate 5 -video_size 1920x1080 -i /dev/video0 -c:v libvpx -c:a libvorbis output.webm
+  video_converter:
+    image: jrottenberg/ffmpeg
+    environment:
+      # frames per second (video to image)
+      - FPS=5
+      # where can the videos be found? Assumes game videos are in a subdir called
+      # game and ads are in a subdir called ad
+      - VIDEO_BASE_DIR=/tmp/football
+      # where should converted images land?
+      - DESTINATION_DIR=/tmp/football/converted_images
+      # outputs all ffmpeg output to $LOG_DIR/conversion.log
+      - LOG_DIR=/tmp/football
+    volumes:
+      - /home/brycemcd/Videos/football:/tmp/football
+      - ./:/tmp/bin
+    entrypoint: /tmp/bin/video_converter.sh
+
+  sample_creator:
+    build: .
+    environment:
+      - VIDEO_BASE_DIR=/tmp/football
+    volumes:
+      - /home/brycemcd/Videos/football/converted_images:/tmp/images
+      - ./:/tmp/bin
+
+    command: python -u /tmp/bin/create_samples_from_images.py
