@@ -11,10 +11,12 @@ from os.path import isfile, join
 import numpy as np
 import imageio
 import json
+from kafka import KafkaProducer
 
 BASE_DIR="/tmp/images/"
 IMG_SHAPE = [1, 240, 320, 1]
 DATA_SHAPE = [76800]
+TEST_SAMPLE_COUNT=1000
 
 def vectorize_image(img_path):
     """Given an image, represent it as a vector"""
@@ -74,6 +76,16 @@ def create_sample_from_file(n=None):
         if i and i >= n:
             break
 
+PRODUCER = KafkaProducer(
+    bootstrap_servers="10.1.2.206:9092",
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+)
+
+def write_msg_to_queue(msg):
+
+    # NOTE: KafkaProducer takes care of json'ifying the message
+    PRODUCER.send('supervised_vectorized_images', msg)
+
 if __name__ == "__main__":
     # file = "ad-2017-09-09-174712-1.jpg"
     # file = "game-2017-09-09-174959-1005.jpg"
@@ -84,5 +96,7 @@ if __name__ == "__main__":
 
     # enc = encode_file(file)
     # print(enc)
-    for vec in create_sample_from_file(10):
-        print( json.dumps({"sample": vec.tolist()}) )
+    for vec in create_sample_from_file(TEST_SAMPLE_COUNT):
+        write_msg_to_queue({"sample" : vec.tolist()})
+        print(".", end='', sep='')
+    print("done")

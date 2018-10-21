@@ -1,3 +1,6 @@
+tensorflow
+keras
+kafka-python
 imageio
 numpy
 scipy
