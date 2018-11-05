@@ -4,11 +4,7 @@ services:
   # 240x320, then creates FPS images from the video and writes those images
   # to DESTINATION_DIR
   #
-  # NOTES:
-  # capture directly from webcam:
-  # sudo apt-get install v4l-utils 
-  # Stream from webcam:
-  # ffmpeg -f v4l2 -framerate 5 -video_size 1920x1080 -i /dev/video0 -c:v libvpx -c:a libvorbis output.webm
+
   video_converter:
     image: jrottenberg/ffmpeg
     environment:
@@ -27,11 +23,31 @@ services:
     entrypoint: /tmp/bin/video_converter.sh
 
   sample_creator:
-    build: .
+    # NOTE: build the image in video/Dockerfile as football_sample_and_model
+    #image: .
+    image: football_sample_and_model
     environment:
       - VIDEO_BASE_DIR=/tmp/football
     volumes:
-      - /home/brycemcd/Videos/football/converted_images:/tmp/images
+      - /home/brycemcd/Videos/football/converted_images:/tmp/images:ro
       - ./:/tmp/bin
+      - ../models_and_training_data:/tmp/models_and_training_data
 
-    command: python -u /tmp/bin/create_samples_from_images.py
+#    command: python -u /tmp/bin/create_samples_from_images.py
+#    command: python -u /tmp/bin/create_training_data.py
+    command: python -u /tmp/bin/model_generator.py
+     # tests
+#    command: pytest /tmp/bin/test/test_create_training_data.py
+
+  image_stream_classifier:
+    # NOTE: build the image in video/Dockerfile as football_sample_and_model
+    #image: .
+    image: football_sample_and_model
+    environment:
+    - VIDEO_BASE_DIR=/tmp/football
+    volumes:
+    - ./:/tmp/bin
+    - ../models_and_training_data:/tmp/models_and_training_data
+    - ../models_and_training_data/streamed_images:/tmp/streamed_images
+
+    command: python -u /tmp/bin/classify_image.py

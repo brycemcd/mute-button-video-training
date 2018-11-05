@@ -30,10 +30,27 @@ def create_model():
                      #FIXME: extract this shape into a system-wide variable
                      input_shape=(240, 320, 1),
                      name="conv_1_1"))
+
     model.add(MaxPooling2D(pool_size=(2, 2),
                            strides=(2, 2),
                            padding='same',
                            name="max_pool_1"))
+    model.add(Dropout(0.10))
+
+    # conv 2
+    model.add(Conv2D(64,
+                     kernel_size=(3, 3),
+                     activation='relu',
+                     padding='same',
+                     #FIXME: extract this shape into a system-wide variable
+                     # input_shape=(240, 320, 1),
+                     name="conv_2_1"))
+
+    model.add(MaxPooling2D(pool_size=(2, 2),
+                           strides=(2, 2),
+                           padding='same',
+                           name="max_pool_2"))
+
     model.add(Dropout(0.10))
 
     # Fully Connected
@@ -53,12 +70,21 @@ def train_model(train_x, train_y):
     sgd = keras.optimizers.SGD(lr=1e-3, nesterov=True)
 
     model.compile(loss='categorical_crossentropy',
-                                optimizer=sgd,
-                                metrics=['accuracy'])
+                  optimizer=sgd,
+                  metrics=['accuracy'])
+
+    # NOTE: training speed takes a lot of guess and check on the system
+    # the training is happening. I regularly run `vmstat 2` to keep an eye
+    # on memory, disk and CPU usage. Memory can explode very quickly. Adjust
+    # batch size to prevent swapping and to keep the amount of resident memory
+    # close to a manageable allocation for the system.
+    #
+    # Ideally, the system is tuned such that we can bet the stuffing out of the
+    # (C|G)PUs while optimizing the dataset that can be held resident in RAM
     training_hx = model.fit(
         X_train,
         X_train_labels,
-        batch_size=128, #220
+        batch_size=256, #128, #220
         epochs=3, #FIXME: turn this back into 10
         verbose=1,
         validation_data=(X_valid, X_valid_labels))
@@ -69,7 +95,8 @@ def train_model(train_x, train_y):
 def test_model(model, test_x, test_y):
     return model.evaluate(test_x, test_y, batch_size=128, verbose=1)
 
-def save_model(model, filepath="/tmp/bin"):
+
+def save_model(model, filepath="/tmp/models_and_training_data"):
     model.save(filepath + '/football_cnn.h5')
 
 
@@ -79,10 +106,12 @@ def create_data_split(samples, labels):
                                                         )
     return X_train, X_test, y_train, y_test
 
-def load_data_from_filesystem(basepath="/tmp/bin"):
+
+def load_data_from_filesystem(basepath="/tmp/models_and_training_data"):
     samples = np.load(basepath + "/normalized_all_samples.npy")
     labels = np.load(basepath + "/all_labels.npy")
     return samples, labels
+
 
 if __name__ == "__main__":
 
@@ -90,10 +119,13 @@ if __name__ == "__main__":
 
     X_train, X_test, y_train, y_test = create_data_split(s, l)
 
-    train_hx, model = train_model(X_train, y_train)
+    # From X_train numbers, get 3000 indexes
+    random_indexes = np.random.choice(len(X_train), 3000)
+    # FIXME: time optimization:
+    train_hx, model = train_model(X_train[random_indexes],
+                                  y_train[random_indexes])
     training_eval = test_model(model, X_test, y_test)
 
-    print("TEST SET PERF")
-    print(dict(zip(model.metrics_names, training_eval)))
+    print("TEST SET PERF: %s" % dict(zip(model.metrics_names, training_eval)))
 
     save_model(model)

@@ -1,4 +1,4 @@
-# docker build -t queue_writer .
+# docker build -t football_sample_and_model .
 FROM python:3.6
 
 ENV APP_DIR /opt/project
