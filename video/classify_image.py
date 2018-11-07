@@ -8,10 +8,10 @@ import datetime
 from keras.models import load_model
 import numpy as np
 from create_samples_from_images import vectorize_image
-from common import PREDICTION_CONSUMER
+import common as co
 
 # TODO: this center value should not be copied/pasted
-CENTER_VALUE=85.30501667317708
+CENTER_VALUE = 89.18022428955078
 
 
 def fetch_model(filepath="/tmp/models_and_training_data"):
@@ -23,16 +23,13 @@ def write_image(img_vec):
     imageio.imwrite("/tmp/streamed_images/" + fname + ".jpg", img_vec)
 
 
-import sys
 def make_prediction(model, img_vec):
     img_vec = img_vec.reshape([240, 320, 1]).astype(np.float16)
     write_image(img_vec)
 
-    img_vec -= CENTER_VALUE
-    img_vec /= 255
-    img_vec *= 100
+    img_vec = co.center_sample(img_vec, CENTER_VALUE)
 
-    pred_img = img_vec.reshape([1, 240, 320, 1]).astype(np.int8)
+    pred_img = img_vec.reshape([1, 240, 320, 1])
 
     return model.predict(pred_img,
                          batch_size=None,
@@ -54,7 +51,7 @@ def print_prediction(prediction):
 
 def consume_prediction_queue():
     """docstring for consume_queue"""
-    for msg in PREDICTION_CONSUMER:
+    for msg in co.PREDICTION_CONSUMER:
         yield(msg)
 
 
@@ -85,13 +82,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # #NOTE: I'm testing to see if this works:
-    # basepath = "/tmp/bin"
-    # samples = np.load(basepath + "/normalized_all_samples.npy")
-    # labels = np.load(basepath + "/all_labels.npy")
-
-    # for i in range(10):
-    # pred = make_prediction(model, samples[i])
-    # print("pred %s, actual %s" % (pred,labels[i]))
     main()
 

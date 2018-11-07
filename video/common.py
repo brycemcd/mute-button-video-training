@@ -2,16 +2,29 @@
 Shared values, functions and constants live here
 """
 import json
-from kafka import KafkaConsumer
+from kafka import KafkaConsumer, KafkaProducer
+import numpy as np
 
 
 # TEST_SAMPLE_COUNT=150000 # NOTE: this is the max my machine's memory can tollerate
-TEST_SAMPLE_COUNT=4000
+TEST_SAMPLE_COUNT = 16000
 IMG_SHAPE = [TEST_SAMPLE_COUNT, 240, 320, 1]
 DATA_SHAPE = [76800]
-NOT_GAME_VECTOR = [0, 1]
-GAME_VECTOR = [1, 0]
 
+GAME_LABEL = 1
+NOT_GAME_LABEL = 0
+
+GAME_VECTOR = [GAME_LABEL, NOT_GAME_LABEL]
+NOT_GAME_VECTOR = [NOT_GAME_LABEL, GAME_LABEL]
+
+
+KAFKA_BOOTSTRAP_SERVERS = ["10.1.2.206:9092"]
+
+PRODUCER = KafkaProducer(
+    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+    # NOTE: use this for sample data, not encoded data
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+)
 
 VECTORED_IMAGE_QUEUE = KafkaConsumer('supervised_vectorized_images',
                                      bootstrap_servers='10.1.2.206:9092',
@@ -25,3 +38,19 @@ PREDICTION_CONSUMER = KafkaConsumer('unsupervised_images',
                                     # group_id='my_favorite_group1',
                                     auto_offset_reset='earliest',
                                     )
+
+def center_sample(sample, center_value):
+    """Provides consistent interface to change tensor values for
+    training and prediction
+    """
+    sample = sample.astype(np.float16)
+
+    sample -= center_value
+    sample /= 255
+    sample *= 100
+
+    # NOTE: casting this back to an int has the effect of rounding
+    # We lose precision but gain memory space (8 vs. 16 or 32 bits per value)
+    sample = sample.astype(np.int8)
+
+    return sample
