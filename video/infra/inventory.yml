@@ -1,0 +1,3 @@
+all:
+  hosts:
+    spark4.thedevranch.net

@@ -1,15 +1,15 @@
 """
 Creates models for training. See:
 https://github.com/brycemcd/learning_neural_networks/blob/master/training-chain/2017-11-23-model-creator.ipynb
-For my scratch work on this
+For my scratch work on this.
+
+Model is saved to the filesystem to be used in predictions.
 """
 
 import numpy as np
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
-from keras.layers import Flatten, Conv2D, MaxPooling2D
-
+from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from sklearn.model_selection import train_test_split
 
 # FIXME: this should be shared across most of these classes
@@ -27,18 +27,56 @@ def create_model():
                      input_shape=(240, 320, 1),
                      name="conv_1_1"))
 
+    # model.add(Conv2D(32,
+    #                  kernel_size=(3, 3),
+    #                  activation='relu',
+    #                  padding='same',
+    #                  #FIXME: extract this shape into a system-wide variable
+    #                  name="conv_1_2"))
+
     model.add(MaxPooling2D(pool_size=(2, 2),
                            strides=(2, 2),
                            padding='same',
                            name="max_pool_1"))
-    model.add(Dropout(0.10))
+    # model.add(Dropout(0.05))
 
+    # conv 2
+    model.add(Conv2D(64,
+                     kernel_size=(3, 3),
+                     activation='relu',
+                     padding='same',
+                     name="conv_2_1"))
+
+    # model.add(Conv2D(64,
+    #                  kernel_size=(3, 3),
+    #                  activation='relu',
+    #                  padding='same',
+    #                  name="conv_2_2"))
+
+    model.add(MaxPooling2D(pool_size=(2, 2),
+                           strides=(2, 2),
+                           padding='same',
+                           name="max_pool_2"))
+
+    model.add(Conv2D(128,
+                     kernel_size=(3, 3),
+                     activation='relu',
+                     padding='same',
+                     name="conv_3_1"))
+
+
+    model.add(MaxPooling2D(pool_size=(2, 2),
+                           strides=(2, 2),
+                           padding='same',
+                           name="max_pool_3"))
+
+    model.add(Dropout(0.05))
 
     # Fully Connected
     model.add(Flatten())
 
-    model.add(Dense(512, activation='relu', name="fc_1"))
-    model.add(Dropout(0.2))
+    model.add(Dense(2048, activation='relu', name="fc_1"))
+    model.add(Dropout(0.1))
 
     model.add(Dense(n_classes, activation='softmax', name="output"))
     return model
@@ -66,7 +104,7 @@ def train_model(train_x, train_y):
     training_hx = model.fit(
         x_train,
         x_train_labels,
-        batch_size=256, #128, #220
+        batch_size=128, #220
         epochs=20, #FIXME: turn this back into 10
         verbose=1,
         validation_data=(x_valid, x_valid_labels))

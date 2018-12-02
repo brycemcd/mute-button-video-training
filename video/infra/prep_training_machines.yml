@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    app_root: /opt/mute_viz
+    training_image_dir: /opt/mute_viz/training_images
+  tasks:
+    - file:
+        path: "{{app_root}}"
+        owner: brycemcd
+        group: brycemcd
+        state: directory
+        mode: 0755
+
+    - file:
+        path: "{{training_image_dir}}"
+        owner: brycemcd
+        group: brycemcd
+        state: directory
+        mode: 0755
+
+

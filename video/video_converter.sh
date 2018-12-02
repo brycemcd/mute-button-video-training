@@ -13,6 +13,6 @@ for dir in ${DIRS[@]}; do
   for video_file in $VIDEO_BASE_DIR/$dir/*.webm; do
     echo "converting $video_file"
     outfile=$(basename $video_file ".webm")
-    ffmpeg -i $video_file -vf "scale=320:240, fps=$FPS, format=gray" $DESTINATION_DIR/$dir-$outfile-%d.jpg > $LOG_DIR/conversion.log 2>&1
+    ffmpeg -i $video_file -vf "scale=320:240, fps=$FPS, format=gray" -vframes 100 $DESTINATION_DIR/$dir-$outfile-%d.jpg > $LOG_DIR/conversion.log 2>&1
   done
 done

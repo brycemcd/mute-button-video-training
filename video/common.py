@@ -7,7 +7,7 @@ import numpy as np
 
 
 # TEST_SAMPLE_COUNT=150000 # NOTE: this is the max my machine's memory can tollerate
-TEST_SAMPLE_COUNT = 16000
+TEST_SAMPLE_COUNT = 22000
 IMG_SHAPE = [TEST_SAMPLE_COUNT, 240, 320, 1]
 DATA_SHAPE = [76800]
 
@@ -18,7 +18,7 @@ GAME_VECTOR = [GAME_LABEL, NOT_GAME_LABEL]
 NOT_GAME_VECTOR = [NOT_GAME_LABEL, GAME_LABEL]
 
 
-KAFKA_BOOTSTRAP_SERVERS = ["10.1.2.206:9092"]
+KAFKA_BOOTSTRAP_SERVERS = ["10.1.5.205:9092"]
 
 PRODUCER = KafkaProducer(
     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
@@ -27,16 +27,16 @@ PRODUCER = KafkaProducer(
 )
 
 VECTORED_IMAGE_QUEUE = KafkaConsumer('supervised_vectorized_images',
-                                     bootstrap_servers='10.1.2.206:9092',
+                                     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
                                      value_deserializer=lambda v: json.loads(v),
                                      # group_id='my_favorite_group1',
                                      auto_offset_reset='earliest',
                                      )
 
 PREDICTION_CONSUMER = KafkaConsumer('unsupervised_images',
-                                    bootstrap_servers='10.1.2.206:9092',
+                                    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
                                     # group_id='my_favorite_group1',
-                                    auto_offset_reset='earliest',
+                                    auto_offset_reset='latest',
                                     )
 
 def center_sample(sample, center_value):

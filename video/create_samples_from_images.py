@@ -1,6 +1,6 @@
 """
-Given a directory of images, this script will base64 encode the image and write
-it to a Kafka queue
+Given a directory of images, this script will vectorize (1d) the image and write
+it to a Kafka queue. The data written to the queue is in JSON format.
 
 
 For testing, I did this:
@@ -14,9 +14,9 @@ from os import listdir
 from os.path import isfile, join
 import numpy as np
 import imageio
-from common import TEST_SAMPLE_COUNT, PRODUCER, IMG_SHAPE, DATA_SHAPE, GAME_LABEL, NOT_GAME_LABEL
+import common as co
 
-BASE_DIR="/tmp/test/converted_images/"
+BASE_DIR="/tmp/images/"
 
 
 def vectorize_image(img_path):
@@ -26,7 +26,7 @@ def vectorize_image(img_path):
                         as_gray=True,
                         pilmode="I").astype(np.uint8)
 
-    im = im.reshape(DATA_SHAPE)
+    im = im.reshape(co.DATA_SHAPE)
 
     return im
 
@@ -44,9 +44,9 @@ def sample_label(img_path):
     """labels sample based on path"""
     is_game = True if "game" in img_path else False
     if is_game:
-        return GAME_LABEL
+        return co.GAME_LABEL
     else:
-        return NOT_GAME_LABEL
+        return co.NOT_GAME_LABEL
 
 
 def vectorize_training_sample(img_path):
@@ -72,7 +72,7 @@ def all_files_in_dir():
 def write_msg_to_queue(msg):
 
     # NOTE: KafkaProducer takes care of json'ifying the message
-    PRODUCER.send('supervised_vectorized_images', msg)
+    co.PRODUCER.send('supervised_vectorized_images', msg)
 
 
 def main():
@@ -88,6 +88,6 @@ def main():
 
 
 if __name__ == "__main__":
-    print("vectorizing %s samples" % TEST_SAMPLE_COUNT)
+    print("vectorizing %s samples" % co.TEST_SAMPLE_COUNT)
     main()
     print("done!")

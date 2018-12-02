@@ -1,18 +1,24 @@
 """
-Expects a vector of training data on a kafka queue, create training/test data
+Expects a vector of training data on a kafka queue. Creates training data with
+labels and persists the data to the filesystem.
+
+NOTE: on my 32GB machine, having > ~ 100000 training samples starts to create
+some pressure on memory/swap space. The type casts in `create_training_data`
+are to reduce this pressure in order to optimize getting the most data available
+for training
 """
 
 import numpy as np
 import common as co
 
-LAST_OFFSET = 16953
+# NOTE: run scratch_1 to figure out the last offset
+LAST_OFFSET = 22097
 
 
 # NOTE: /tmp/bin is mapped to the host filesystem in docker
 def save_training_data(filepath="/tmp/models_and_training_data"):
 
-    # samples, labels = create_training_test_data()
-    samples, labels = create_training_test_data()
+    samples, labels = create_training_data()
 
     print("saving all samples")
     np.save(filepath + "/normalized_all_samples", samples)
@@ -20,8 +26,8 @@ def save_training_data(filepath="/tmp/models_and_training_data"):
     np.save(filepath + "/all_labels", labels)
 
 
-def create_training_test_data():
-    """docstring for create_training_test_data"""
+def create_training_data():
+    """docstring for create_training_data"""
     # setting the type for known memory constraints vs. amount of data tradeoff
     single_image_vec_shape = [240, 320, 1]
     samples=np.empty(co.IMG_SHAPE, dtype=np.uint8)
@@ -42,11 +48,12 @@ def create_training_test_data():
 
         labels[i] = np.array(label, dtype=np.uint8)
 
+        i += 1
         # NOTE: read the queue in its entirety
-        if msg.offset >= LAST_OFFSET:
+        # if msg.offset >= LAST_OFFSET:
+        if i >= samples.shape[0]:
             break
 
-        i += 1
         if i % 1000 == 0:
             print(".", end='', sep='', flush=True)
 

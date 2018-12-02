@@ -11,7 +11,7 @@ from create_samples_from_images import vectorize_image
 import common as co
 
 # TODO: this center value should not be copied/pasted
-CENTER_VALUE = 89.18022428955078
+CENTER_VALUE = 86.65435456380209
 
 
 def fetch_model(filepath="/tmp/models_and_training_data"):
@@ -25,7 +25,7 @@ def write_image(img_vec):
 
 def make_prediction(model, img_vec):
     img_vec = img_vec.reshape([240, 320, 1]).astype(np.float16)
-    write_image(img_vec)
+    # write_image(img_vec)
 
     img_vec = co.center_sample(img_vec, CENTER_VALUE)
 
