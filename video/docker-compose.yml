@@ -22,32 +22,31 @@ services:
       - ./:/tmp/bin
     entrypoint: /tmp/bin/video_converter.sh
 
+  # NOTE: build the image in video/Dockerfile as football_sample_and_model
   model_training:
-    # NOTE: build the image in video/Dockerfile as football_sample_and_model
-    #image: .
     image: football_sample_and_model
     volumes:
       - /home/brycemcd/Videos/football/converted_images:/tmp/images:ro
       - ./:/tmp/bin
       - ../models_and_training_data:/tmp/models_and_training_data
-      - /home/brycemcd/Videos/football_test:/tmp/test
+      #- /home/brycemcd/Videos/football_test:/tmp/test
 
-#    command: python -u /tmp/bin/create_samples_from_images.py
+    command: python -u /tmp/bin/create_samples_from_images.py
 #    command: python -u /tmp/bin/create_training_data.py
-    command: python -u /tmp/bin/model_generator.py
+#    command: python -u /tmp/bin/model_generator.py
      # tests
 #    command: pytest /tmp/bin/test/test_create_training_data.py
 #    command: pytest /tmp/bin/test/test_create_samples_from_images.py
 
   image_stream_classifier:
-    # NOTE: build the image in video/Dockerfile as football_sample_and_model
-    #image: .
+     # NOTE: build the image in video/Dockerfile as football_sample_and_model
+     #image: .
     image: football_sample_and_model
     environment:
-    - VIDEO_BASE_DIR=/tmp/football
+      - VIDEO_BASE_DIR=/tmp/football
     volumes:
-    - ./:/tmp/bin
-    - ../models_and_training_data:/tmp/models_and_training_data
-    - ../models_and_training_data/streamed_images:/tmp/streamed_images
+      - ./:/tmp/bin
+      - ../models_and_training_data:/tmp/models_and_training_data
+      - ../models_and_training_data/streamed_images:/tmp/streamed_images
 
     command: python -u /tmp/bin/classify_image.py

@@ -12,7 +12,7 @@ import numpy as np
 import common as co
 
 # NOTE: run scratch_1 to figure out the last offset
-LAST_OFFSET = 22097
+LAST_OFFSET = 22000
 
 
 # NOTE: /tmp/bin is mapped to the host filesystem in docker
@@ -60,7 +60,7 @@ def create_training_data():
     # NORMALIZE SAMPLES:
     # Helpful background: http://cs231n.github.io/neural-networks-2/#datapre
     # NOTE: if you get this warning: RuntimeWarning: overflow encountered in reduce
-    # then the centering is infinity and your training data is crap
+    # then the centering is infinity and your training data are crap
     print("CENTERING")
     center = np.mean(samples)
     print("CENTER IS %s. ADD THIS TO classify_image.py for prediction treatment" % center)

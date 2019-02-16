@@ -13,6 +13,33 @@
         state: directory
         mode: 0755
 
+    #- git:
+        #repo: https://github.com/brycemcd/mute-button-video-training.git
+        #dest: "{{app_root}}/video-training"
+
+    - file:
+        path: "{{app_root}}/video-training"
+        owner: brycemcd
+        group: brycemcd
+        state: directory
+        recurse: yes
+        mode: 0755
+
+    #- file:
+        #path: "{{app_root}}/video-training/models_and_training_data"
+        #owner: brycemcd
+        #group: brycemcd
+        #state: directory
+        #mode: 0755
+
+    - name: copy existing training data to remotes
+      copy:
+        src: /home/brycemcd/Sites/mute_test/models_and_training_data/
+        dest: "{{app_root}}/video-training/models_and_training_data"
+        owner: brycemcd
+        group: brycemcd
+        mode: 0644
+
     - file:
         path: "{{training_image_dir}}"
         owner: brycemcd

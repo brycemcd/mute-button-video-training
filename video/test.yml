@@ -1,0 +1,5 @@
+version: '3'
+services:
+  test:
+    image: football_sample_and_model
+    command: echo "hello world"
