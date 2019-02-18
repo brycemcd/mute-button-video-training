@@ -47,7 +47,7 @@ services:
     #command: python -u /tmp/bin/model_generator_consumer.py
 
   model_consumer:
-    image: football_sample_and_model
+    image: brycemcd/football_sample_and_model
     volumes:
       - /home/brycemcd/Videos/football/converted_images:/tmp/images:ro
       - ./:/tmp/bin

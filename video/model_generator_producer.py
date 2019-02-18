@@ -109,10 +109,11 @@ def create_model():
 def write_to_consumer(model):
     """write a keras model to a kafka queue"""
 
-    co.MODEL_PRODUCER.send(QUEUE_MODEL_NAME,
-                           model.to_json().encode('utf-8'))
-    # NOTE: this flush is required to send it right away
-    co.MODEL_PRODUCER.flush()
+    for _ in range(20):
+        co.MODEL_PRODUCER.send(QUEUE_MODEL_NAME,
+                               model.to_json().encode('utf-8'))
+        # NOTE: this flush is required to send it right away
+        co.MODEL_PRODUCER.flush()
 
 def main():
     model = create_model()

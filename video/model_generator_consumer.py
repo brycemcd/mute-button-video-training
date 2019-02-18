@@ -78,6 +78,11 @@ def publish_results(result_dict):
     co.PRODUCER.send(QUEUE_MODEL_RESULTS_NAME, result_dict)
     co.PRODUCER.flush()
 
+def consume_queue():
+    """docstring for consume_queue"""
+    for msg in co.MODEL_CONSUMER:
+        yield(msg)
+
 def main():
     """docstring for consume_queue"""
     print("starting up")
@@ -86,7 +91,7 @@ def main():
     x_train, x_test, y_train, y_test = create_data_split(s, l)
 
     print("data loaded, ready for models")
-    for msg in co.MODEL_CONSUMER:
+    for msg in consume_queue():
         model = model_from_json(json.dumps(msg.value))
         # From X_train numbers, get 3000 indexes
         # random_indexes = np.random.choice(len(x_train), 3000)
