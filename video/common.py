@@ -18,7 +18,7 @@ GAME_VECTOR = [GAME_LABEL, NOT_GAME_LABEL]
 NOT_GAME_VECTOR = [NOT_GAME_LABEL, GAME_LABEL]
 
 
-KAFKA_BOOTSTRAP_SERVERS = ["10.1.2.230:9092"]
+KAFKA_BOOTSTRAP_SERVERS = ["10.1.2.230:9092", "10.1.2.244:9092", "10.1.5.207:9092"]
 
 PRODUCER = KafkaProducer(
     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
@@ -26,18 +26,31 @@ PRODUCER = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode('utf-8'),
 )
 
-VECTORED_IMAGE_QUEUE = KafkaConsumer('supervised_vectorized_images',
-                                     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-                                     value_deserializer=lambda v: json.loads(v),
-                                     # group_id='my_favorite_group1',
-                                     auto_offset_reset='earliest',
-                                     )
+MODEL_PRODUCER = KafkaProducer(
+    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+    # value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    # NOTE: use this for sample data, not encoded data
+)
 
-PREDICTION_CONSUMER = KafkaConsumer('unsupervised_images',
-                                    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-                                    # group_id='my_favorite_group1',
-                                    auto_offset_reset='latest',
-                                    )
+# VECTORED_IMAGE_QUEUE = KafkaConsumer('supervised_vectorized_images',
+                                     # bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+                                     # value_deserializer=lambda v: json.loads(v),
+                                     # # group_id='my_favorite_group1',
+                                     # auto_offset_reset='earliest',
+                                     # )
+
+QUEUE_MODEL_NAME="footballModelsArchitectures"
+MODEL_CONSUMER = KafkaConsumer(QUEUE_MODEL_NAME,
+                               bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+                               value_deserializer=lambda v: json.loads(v),
+                               group_id='model_consumers',
+                               auto_offset_reset='latest',
+)
+# PREDICTION_CONSUMER = KafkaConsumer('unsupervised_images',
+                                    # bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+                                    # # group_id='my_favorite_group1',
+                                    # auto_offset_reset='latest',
+                                    # )
 
 def center_sample(sample, center_value):
     """Provides consistent interface to change tensor values for

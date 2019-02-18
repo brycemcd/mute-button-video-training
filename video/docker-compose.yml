@@ -38,6 +38,22 @@ services:
 #    command: pytest /tmp/bin/test/test_create_training_data.py
 #    command: pytest /tmp/bin/test/test_create_samples_from_images.py
 
+  model_listener:
+    image: football_sample_and_model
+    volumes:
+      - /home/brycemcd/Videos/football/converted_images:/tmp/images:ro
+      - ./:/tmp/bin
+    command: python -u /tmp/bin/model_generator_producer.py
+    #command: python -u /tmp/bin/model_generator_consumer.py
+
+  model_consumer:
+    image: football_sample_and_model
+    volumes:
+      - /home/brycemcd/Videos/football/converted_images:/tmp/images:ro
+      - ./:/tmp/bin
+      - ../models_and_training_data:/tmp/models_and_training_data
+    command: python -u /tmp/bin/model_generator_consumer.py
+
   image_stream_classifier:
      # NOTE: build the image in video/Dockerfile as football_sample_and_model
      #image: .
